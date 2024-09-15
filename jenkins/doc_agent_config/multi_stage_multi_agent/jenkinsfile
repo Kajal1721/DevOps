@@ -1,0 +1,40 @@
+pipeline {
+  agent none
+  stages {
+    stage('Back-end') {
+      agent {
+        docker { image 'maven:3.8.1-adoptopenjdk-11' }
+      }
+      steps {
+        sh 'mvn --version'
+      }
+    }
+    stage('Front-end') {
+      agent {
+        docker { image 'node:16-alpine' }
+      }
+      steps {
+        sh 'node --version'
+      }
+    }
+    stage('Java Hello-World') {
+      agent {
+        docker { 
+          image 'openjdk:latest'
+          args '-v $PWD:/workspace' // Mount the current directory into the container
+        }
+      }
+      steps {
+        script {
+          // Change the directory to where HelloWorld.java is located
+          dir('/var/lib/jenkins/workspace/Docker_agent_configuration/jenkins/doc_agent_config/multi_stage_multi_agent') {
+            // Compile HelloWorld.java
+            sh 'javac HelloWorld.java'
+            // Run the compiled Java program
+            sh 'java HelloWorld'
+          }
+        }
+      }
+    }
+  }
+}
